@@ -16,13 +16,23 @@ body {
      background-color: #f7f7f7;
 }
 
+header {
+     background-color: darkslategray;
+     color: #fff;
+     text-align: center;
+     padding: 20px 0;
+     border-radius: 7px 7px 0 0;
+}
+
+
 /*styling for chatbot toggler icon*/
-.Material+Symbols+Outline {
+.material-symbols-outlined {
+     font-size: 75px;
      font-variation-settings:
           'FILL' 0,
-          'wght' 400,
+          'wght' 200,
           'GRAD' 0,
-          'opsz' 24
+          'opsz' 0
 }
 
 .chatbot-toggler {
@@ -31,17 +41,19 @@ body {
      right: 35px;
      outline: none;
      border: none;
-     height: 80px;
-     width: 80px;
+     height: 90px;
+     width: 90px;
      display: flex;
      cursor: pointer;
      align-items: center;
      justify-content: center;
      border-radius: 30%;
-     background: #724ae8;
+     background: cadetblue;
      transition: all 0.2s ease;
 }
 
+
+/*styling for open chat box*/
 .chatBot {
      border: 3px solid darkslategray;
      border-radius: 10px;
@@ -55,14 +67,6 @@ body {
      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
      background-repeat: no-repeat;
      background-position: center;
-}
-
-header {
-     background-color: darkslategray;
-     color: #fff;
-     text-align: center;
-     padding: 20px 0;
-     border-radius: 7px 7px 0 0;
 }
 
 .chatbox {
