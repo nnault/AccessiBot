@@ -1,1 +1,1 @@
-
+const chatbotToggler = document.querySelector(".chatbot-toggler");
