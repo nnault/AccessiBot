@@ -28,6 +28,7 @@ header {
 /*styling for chatbot toggler icon*/
 .material-symbols-outlined {
      font-size: 75px;
+     color: #fff;
      font-variation-settings:
           'FILL' 0,
           'wght' 200,
@@ -48,13 +49,17 @@ header {
      align-items: center;
      justify-content: center;
      border-radius: 30%;
-     background: cadetblue;
+     background: darkslategray;
      transition: all 0.2s ease;
 }
 
 
-/*styling for open chat box*/
-.chatBot {
+/*styling for chat box, hidden until toggler is clicked*/
+.hidden {
+     display: none;
+}
+
+#chatBot {
      border: 3px solid darkslategray;
      border-radius: 10px;
      margin: 50px auto;
