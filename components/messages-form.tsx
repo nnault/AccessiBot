@@ -1,9 +1,15 @@
 "use client";
 import { sendMessage } from "@/actions/messages";
 import { useRef } from "react";
-export const MessagesForm = () => {
+export const MessagesForm = ({
+  questionID,
+  type,
+}: {
+  questionID: string;
+  type: string;
+}) => {
   const messageInput = useRef<HTMLTextAreaElement>(null);
-
+  console.log(`messageFormType=${type}`);
   return (
     <div className="chat-input">
       <form
@@ -24,7 +30,8 @@ export const MessagesForm = () => {
         />
         <br />
         <br />
-
+        <input type="hidden" name="questionID" value={questionID} />
+        <input type="hidden" name="type" value={type} />
         <input type="submit" value="Submit" />
       </form>
     </div>

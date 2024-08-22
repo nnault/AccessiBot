@@ -8,8 +8,10 @@ function parseBoolean(value: string | null): boolean {
 }
 export const MessagesClient = ({
   messages,
+  questionID,
 }: {
   messages: Tables<"messages">[];
+  questionID: string;
 }) => {
   //function that speaks a message
   const speak = (message: string) => {
@@ -23,21 +25,27 @@ export const MessagesClient = ({
   const supabase = createClient();
   useEffect(() => {
     const subscription = supabase
-      .channel("messages")
+      .channel(`messages question_id=eq.${questionID}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages" },
-        (payload: any) => {
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `question_id=eq.${questionID}`,
+        },
+        async (payload: any) => {
           console.log("Change received!", payload);
+
+          //speak message if checkbox is checked
+
+          if ((await localStorage.getItem("shouldSpeak")) === "true") {
+            speak(`${payload.new.display_name}: ${payload.new.message_text}`);
+          }
           setMessagesState((messages: Tables<"messages">[]) => [
             ...messages,
             payload.new,
           ]);
-
-          //speak message if checkbox is checked
-          if (localStorage.getItem("shouldSpeak") === "true") {
-            speak(payload.new.message_text);
-          }
         }
       )
       .subscribe();
@@ -45,9 +53,18 @@ export const MessagesClient = ({
       subscription.unsubscribe();
     };
   }, []);
-  const [shouldSpeakState, setShouldSpeakState] = useState(
-    parseBoolean(localStorage.getItem("shouldSpeak")?.toString() ?? "false")
-  );
+  const [shouldSpeakState, setShouldSpeakState] = useState("");
+  useEffect(() => {
+    if (shouldSpeakState !== "")
+      localStorage.setItem("shouldSpeak", shouldSpeakState.toString());
+  }, [shouldSpeakState]);
+  //check for shouldSpeak on first render and set state
+  useEffect(() => {
+    const shouldSpeak = localStorage.getItem("shouldSpeak");
+    if (shouldSpeak) {
+      setShouldSpeakState(parseBoolean(shouldSpeak).toString());
+    }
+  }, []);
   return (
     <div>
       <div role="log" aria-live="polite" aria-relevant="additions text">
@@ -55,10 +72,9 @@ export const MessagesClient = ({
         <input
           type="checkbox"
           id="shouldSpeak"
-          checked={shouldSpeakState}
+          checked={parseBoolean(shouldSpeakState)}
           onChange={(e) => {
-            localStorage.setItem("shouldSpeak", e.target.checked.toString());
-            setShouldSpeakState(e.target.checked);
+            setShouldSpeakState(e.target.checked.toString());
           }}
         />
         <ul className="chatbox">

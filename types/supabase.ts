@@ -14,21 +14,31 @@ export type Database = {
           display_name: string | null
           id: number
           message_text: string
+          question_id: number | null
           user_id: string | null
         }
         Insert: {
           display_name?: string | null
           id?: number
           message_text: string
+          question_id?: number | null
           user_id?: string | null
         }
         Update: {
           display_name?: string | null
           id?: number
           message_text?: string
+          question_id?: number | null
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "messages_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "messages_user_id_fkey"
             columns: ["user_id"]
@@ -37,6 +47,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      questions: {
+        Row: {
+          answered: boolean | null
+          display_name: string
+          id: number
+          question_text: string
+        }
+        Insert: {
+          answered?: boolean | null
+          display_name: string
+          id?: number
+          question_text: string
+        }
+        Update: {
+          answered?: boolean | null
+          display_name?: string
+          id?: number
+          question_text?: string
+        }
+        Relationships: []
       }
     }
     Views: {
