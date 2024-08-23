@@ -1,5 +1,5 @@
 "use server";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, serverTimestamp } from "firebase/firestore";
 import { collection, addDoc } from "firebase/firestore";
 import { redirect } from "next/navigation";
 import invariant from "tiny-invariant";
@@ -16,7 +16,7 @@ export const sendQuestion = async (data: FormData) => {
   const docRef = await addDoc(collection(db, "questions"), {
     questionText,
     displayName,
-    createdAt: new Date(),
+    createdAt: serverTimestamp(),
     answered: false,
   });
   console.log("Document written with ID: ", docRef.id);

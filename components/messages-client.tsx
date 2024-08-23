@@ -20,7 +20,7 @@ export const MessagesClient = ({ messages }: { messages: MESSAGETYPE[] }) => {
   useEffect(() => {
     if (messages.length === 0) return;
     const lastmessage = messages[messages.length - 1];
-    speak(lastmessage.messageText);
+    if (shouldSpeakState === "true") speak(lastmessage.messageText);
   }, [messages]);
 
   useEffect(() => {

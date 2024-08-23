@@ -29,9 +29,15 @@ export const MessagesServer = ({
   const getdata = async () => {
     console.log("get data function");
 
-    const querySnapshot = await getDocs(q);
-    const data = querySnapshot.docs.map((doc) => doc.data()) as MESSAGETYPE[];
-    setData(data);
+    //const querySnapshot = await getDocs(q);
+    const subscribe = onSnapshot(q, (querySnapshot) => {
+      const data: any[] = [];
+      querySnapshot.forEach((doc) => {
+        data.push({ id: doc.id, ...doc.data() });
+      });
+      setData(data);
+    });
+    return subscribe;
   };
   useEffect(() => {
     getdata();
@@ -40,7 +46,7 @@ export const MessagesServer = ({
     <div>
       <h3>Messages</h3>
       <MessagesClient messages={data ?? []} />
-      <MessagesForm questionID={questionID} type={type} getData={getdata} />
+      <MessagesForm questionID={questionID} type={type} />
     </div>
   );
 };

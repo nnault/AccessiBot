@@ -4,11 +4,11 @@ import { useRef } from "react";
 export const MessagesForm = ({
   questionID,
   type,
-  getData,
-}: {
+}: //getData,
+{
   questionID: string;
   type: string;
-  getData: () => Promise<void>;
+  //getData: () => Promise<void>;
 }) => {
   const messageInput = useRef<HTMLTextAreaElement>(null);
   console.log(`messageFormType=${type}`);
@@ -17,7 +17,7 @@ export const MessagesForm = ({
       <form
         action={async (data: FormData) => {
           await sendMessage(data);
-          await getData();
+          //await getData();
           if (messageInput.current) messageInput.current.value = "";
         }}
       >

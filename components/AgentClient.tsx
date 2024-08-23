@@ -25,7 +25,7 @@ const AgentClient = ({ questions }: { questions: any }) => {
       querySnapshot.forEach((doc: any) => {
         data.push({ id: doc.id, ...doc.data() });
       });
-      setQuestionsState(data);
+      setQuestionsState(data as []);
     });
     return unsubscribe;
   }, []);
@@ -44,7 +44,7 @@ const AgentClient = ({ questions }: { questions: any }) => {
             {questionsState?.map((question: any) => (
               <tr key={question.id}>
                 <td>
-                  <Link target="_blank" href={`/question/${question.id}/agent`}>
+                  <Link href={`/question/${question.id}/agent`}>
                     {question.questionText}
                   </Link>
                 </td>
