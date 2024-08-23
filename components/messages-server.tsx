@@ -1,28 +1,46 @@
-import { getFirestore } from "firebase/firestore";
-import { getAuthenticatedAppForUser } from "@/utils/firebase/serverApp";
-import { collection, getDocs, query, where } from "firebase/firestore";
+"use client";
+import { getFirestore, orderBy } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  onSnapshot,
+} from "firebase/firestore";
 import { MessagesClient } from "./messages-client";
 import { MessagesForm } from "./messages-form";
-export const MessagesServer = async ({
+import { firebaseApp } from "@/utils/firebase/clientApp";
+import { useEffect, useState } from "react";
+export const MessagesServer = ({
   questionID,
   type,
 }: {
   questionID: string;
   type: string;
 }) => {
-  const { firebaseServerApp } = await getAuthenticatedAppForUser();
-  const db = getFirestore(firebaseServerApp);
+  const [data, setData] = useState<MESSAGETYPE[]>([]);
+  const db = getFirestore(firebaseApp);
   const q = query(
     collection(db, "messages"),
-    where("questionID", "==", questionID)
+    where("questionID", "==", questionID),
+    orderBy("createdAt")
   );
-  const querySnapshot = await getDocs(q);
-  const data = querySnapshot.docs.map((doc) => doc.data());
+
+  const getdata = async () => {
+    console.log("get data function");
+
+    const querySnapshot = await getDocs(q);
+    const data = querySnapshot.docs.map((doc) => doc.data()) as MESSAGETYPE[];
+    setData(data);
+  };
+  useEffect(() => {
+    getdata();
+  }, []);
   return (
     <div>
       <h3>Messages</h3>
-      <MessagesClient messages={data ?? []} questionID={questionID} />
-      <MessagesForm questionID={questionID} type={type} />
+      <MessagesClient messages={data ?? []} />
+      <MessagesForm questionID={questionID} type={type} getData={getdata} />
     </div>
   );
 };
