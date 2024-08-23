@@ -1,4 +1,6 @@
-import { createClient } from "@/utils/supabase/server";
+import { getFirestore } from "firebase/firestore";
+import { getAuthenticatedAppForUser } from "@/utils/firebase/serverApp";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { MessagesClient } from "./messages-client";
 import { MessagesForm } from "./messages-form";
 export const MessagesServer = async ({
@@ -8,12 +10,14 @@ export const MessagesServer = async ({
   questionID: string;
   type: string;
 }) => {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("messages")
-    .select("*")
-    .eq("question_id", questionID);
-
+  const { firebaseServerApp } = await getAuthenticatedAppForUser();
+  const db = getFirestore(firebaseServerApp);
+  const q = query(
+    collection(db, "messages"),
+    where("questionID", "==", questionID)
+  );
+  const querySnapshot = await getDocs(q);
+  const data = querySnapshot.docs.map((doc) => doc.data());
   return (
     <div>
       <h3>Messages</h3>

@@ -1,45 +1,38 @@
 "use client";
-import { Tables } from "@/types/supabase";
-import { createClient } from "@/utils/supabase/client";
+import { firebaseApp } from "@/utils/firebase/clientApp";
+
+import {
+  collection,
+  onSnapshot,
+  getDoc,
+  getFirestore,
+  query,
+  where,
+} from "firebase/firestore";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-const AgentClient = ({ questions }: { questions: Tables<"questions">[] }) => {
-  const [questionsState, setQuestionsState] =
-    useState<Tables<"questions">[]>(questions);
-  const supabase = createClient();
+const AgentClient = ({ questions }: { questions: any }) => {
+  const [questionsState, setQuestionsState] = useState([]);
+  const db = getFirestore(firebaseApp);
   console.log("before effect.");
   useEffect(() => {
-    // Subscribe to new questions
-
-    let subscription: any;
-    try {
-      subscription = supabase
-        .channel("agentQuestions")
-        .on(
-          "postgres_changes",
-          { event: "INSERT", schema: "public", table: "questions" },
-          (payload: any) => {
-            console.log("Change received!", payload);
-            setQuestionsState((questions: Tables<"questions">[]) => [
-              ...questions,
-              payload.new,
-            ]);
-          }
-        );
-    } catch (e) {
-      console.log(e);
-    }
-
-    return () => {
-      subscription.unsubscribe();
-
-      //updateSubscription.unsubscribe();
-    };
+    const q = query(
+      collection(db, "questions"),
+      where("answered", "==", false)
+    );
+    const unsubscribe = onSnapshot(q, (querySnapshot: any) => {
+      const data: any[] = [];
+      querySnapshot.forEach((doc: any) => {
+        data.push({ id: doc.id, ...doc.data() });
+      });
+      setQuestionsState(data);
+    });
+    return unsubscribe;
   }, []);
 
   return (
     <div>
-      {questionsState.length > 0 && (
+      {questionsState?.length > 0 && (
         <table>
           <thead>
             <tr>
@@ -48,14 +41,14 @@ const AgentClient = ({ questions }: { questions: Tables<"questions">[] }) => {
             </tr>
           </thead>
           <tbody>
-            {questionsState.map((question) => (
+            {questionsState?.map((question: any) => (
               <tr key={question.id}>
                 <td>
-                  <Link target="_blank" href={`/chat/${question.id}/agent`}>
-                    {question.question_text}
+                  <Link target="_blank" href={`/question/${question.id}/agent`}>
+                    {question.questionText}
                   </Link>
                 </td>
-                <td>{question.display_name}</td>
+                <td>{question.displayName}</td>
               </tr>
             ))}
           </tbody>

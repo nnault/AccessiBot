@@ -1,36 +1,38 @@
 "use server";
-import { createClient } from "@/utils/supabase/server";
+import { doc, getDoc, serverTimestamp } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
+import { getAuthenticatedAppForUser } from "@/utils/firebase/serverApp";
+
 import invariant from "tiny-invariant";
 export const sendMessage = async (data: FormData) => {
-  const supabase = createClient();
-  const { data: user } = await supabase.auth.getUser();
+  const { firebaseServerApp, currentUser } = await getAuthenticatedAppForUser();
+  const db = getFirestore(firebaseServerApp);
 
   const messageText = data.get("message") as string;
   const questionID = data.get("questionID") as string;
   const type = data.get("type") as string;
-  console.log(`type=${type}`);
-  const { data: question } = await supabase
-    .from("questions")
-    .select("*")
-    .eq("id", questionID);
-  invariant(question, "Question not found");
-  // Send message to the database
+
   // If the user is an agent, use their display name
   // Otherwise, use the display name from the question
-  const { data: newMessage, error } = await supabase.from("messages").insert([
-    {
-      message_text: messageText,
-      user_id: user.user?.id,
-      display_name:
-        type === "agent"
-          ? user.user?.user_metadata.displayName
-          : question[0].display_name ?? "",
-      question_id: +questionID,
-    },
-  ]);
-  if (error) {
-    console.error("Error sending message:", error);
+
+  let displayName = "";
+  invariant(messageText, "Message text is required");
+  invariant(questionID, "Question ID is required");
+  if (type === "agent") {
+    displayName = currentUser?.displayName ?? "Agent";
   } else {
-    console.log("Message sent:", newMessage);
+    const questionDoc = await getDoc(
+      doc(collection(db, "questions"), questionID)
+    );
+    displayName = questionDoc.data()?.displayName;
   }
+  invariant(displayName, "Display name is required");
+  //insert the message into firebase
+  await addDoc(collection(db, "messages"), {
+    messageText,
+    questionID,
+    displayName,
+    createdAt: serverTimestamp(),
+  });
 };

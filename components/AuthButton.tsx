@@ -1,26 +1,21 @@
-import { createClient } from "@/utils/supabase/server";
+import { getAuthenticatedAppForUser } from "@/utils/firebase/serverApp";
+import { signOut } from "firebase/auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function AuthButton() {
-  const supabase = createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { currentUser: user } = await getAuthenticatedAppForUser();
 
   const signOut = async () => {
     "use server";
 
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    await signOut();
     return redirect("/login");
   };
 
   return user ? (
     <div className="flex items-center gap-4">
-      Hey, {user.user_metadata?.displayName}!
-      <Link href={`/agent`}>Agent View</Link>
+      Hey, {user.displayName}!<Link href={`/agent`}>Agent View</Link>
       <form action={signOut}>
         <button className="py-2 px-4 rounded-md no-underline bg-btn-background hover:bg-btn-background-hover">
           Logout

@@ -1,7 +1,17 @@
 "use client";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  getFirestore,
+  orderBy,
+  serverTimestamp,
+} from "firebase/firestore";
+import { firebaseApp } from "@/utils/firebase/clientApp";
+
 import { useRef } from "react";
-import type { Tables } from "@/types/supabase";
-import { createClient } from "@/utils/supabase/client";
+
 import { useEffect, useState } from "react";
 function parseBoolean(value: string | null): boolean {
   return value?.toLowerCase() === "true";
@@ -10,7 +20,7 @@ export const MessagesClient = ({
   messages,
   questionID,
 }: {
-  messages: Tables<"messages">[];
+  messages: any;
   questionID: string;
 }) => {
   //function that speaks a message
@@ -20,51 +30,44 @@ export const MessagesClient = ({
     synth.speak(utterThis);
   };
   //subscribe to messages
-  const [messagesState, setMessagesState] =
-    useState<Tables<"messages">[]>(messages);
-  const supabase = createClient();
+  const [messagesState, setMessagesState] = useState([]);
+
+  const [shouldSpeakState, setShouldSpeakState] = useState(
+    parseBoolean(localStorage.getItem("shouldSpeak")).toString()
+  );
+
+  const db = getFirestore(firebaseApp);
   useEffect(() => {
-    const subscription = supabase
-      .channel(`messages question_id=eq.${questionID}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `question_id=eq.${questionID}`,
-        },
-        async (payload: any) => {
-          console.log("Change received!", payload);
-
-          //speak message if checkbox is checked
-
-          if ((await localStorage.getItem("shouldSpeak")) === "true") {
-            speak(`${payload.new.display_name}: ${payload.new.message_text}`);
-          }
-          setMessagesState((messages: Tables<"messages">[]) => [
-            ...messages,
-            payload.new,
+    const q = query(
+      collection(db, "messages"),
+      where("questionID", "==", questionID),
+      orderBy("createdAt")
+    );
+    console.warn(`shouldSpeak outside of unsubscribe:${shouldSpeakState}`);
+    const unsubscribe = onSnapshot(q, (querySnapshot: any) => {
+      querySnapshot.docChanges().forEach((change: any) => {
+        if (change.type === "added") {
+          setMessagesState((data) => [
+            ...data,
+            { id: change.doc.id, ...change.doc.data() },
           ]);
+          console.warn(`shouldSpeakState: ${shouldSpeakState}`);
+          if (shouldSpeakState === "true") {
+            speak(change.doc.data().messageText);
+          }
         }
-      )
-      .subscribe();
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-  const [shouldSpeakState, setShouldSpeakState] = useState("");
+      }); //end of querySnapshot
+    }); //end of onSnapshot
+    return unsubscribe;
+  }, [questionID]); //end of useEffect
   useEffect(() => {
-    if (shouldSpeakState !== "")
-      localStorage.setItem("shouldSpeak", shouldSpeakState.toString());
-  }, [shouldSpeakState]);
-  //check for shouldSpeak on first render and set state
-  useEffect(() => {
-    const shouldSpeak = localStorage.getItem("shouldSpeak");
-    if (shouldSpeak) {
-      setShouldSpeakState(parseBoolean(shouldSpeak).toString());
+    async function setLocalStorage() {
+      if (shouldSpeakState !== "")
+        await localStorage.setItem("shouldSpeak", shouldSpeakState.toString());
     }
-  }, []);
+    setLocalStorage();
+  }, [shouldSpeakState]);
+
   return (
     <div>
       <div role="log" aria-live="polite" aria-relevant="additions text">
@@ -75,12 +78,13 @@ export const MessagesClient = ({
           checked={parseBoolean(shouldSpeakState)}
           onChange={(e) => {
             setShouldSpeakState(e.target.checked.toString());
+            //setMessagesState([]);
           }}
         />
         <ul className="chatbox">
           {messagesState.map((message) => (
             <li key={message.id} className="chat-incoming chat">
-              {message.display_name}: {message.message_text}
+              {message.displayName}: {message.messageText}
             </li>
           ))}
         </ul>

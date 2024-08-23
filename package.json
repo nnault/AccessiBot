@@ -2,13 +2,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build-service-worker": "npx esbuild auth-service-worker.js --bundle --outfile=public/auth-service-worker.js",
+    "build": "npm run build-service-worker&&next build",
     "start": "next start"
   },
   "dependencies": {
     "@supabase/ssr": "latest",
     "@supabase/supabase-js": "latest",
     "autoprefixer": "10.4.17",
+    "firebase": "^10.13.0",
     "geist": "^1.2.1",
     "next": "latest",
     "postcss": "8.4.33",
