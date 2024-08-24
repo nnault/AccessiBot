@@ -6,7 +6,7 @@ import {
   signOut,
   onAuthStateChanged,
 } from "@/utils/firebase/auth.js";
-import { addFakeRestaurantsAndReviews } from "@/utils/firebase/firestore.js";
+
 import { useRouter } from "next/navigation";
 import { firebaseConfig } from "@/utils/firebase/config";
 
@@ -68,16 +68,16 @@ const Header = ({ initialUser }: { initialUser: any }) => {
         <>
           <div>
             Hello {user?.displayName}
-            <Link href="/agent">Ag ent View</Link>
+            <Link href="/agent">Agent View</Link>
             <button onClick={handSignOut}>Sign Out</button>
           </div>
         </>
       ) : (
         <>
           <div>
-            <Link href="/login">Agent Login</Link>
+            <Link href="/login">Agent Login with Email/Password</Link>
             <Link href="/ask">Ask a Question</Link>
-            <button onClick={handLogin}>Sign In With Google</button>
+            <button onClick={handLogin}>Agent Sign In With Google</button>
           </div>
         </>
       )}

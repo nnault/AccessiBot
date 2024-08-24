@@ -2,46 +2,17 @@ import { initializeApp } from "firebase/app";
 import { getAuth, getIdToken } from "firebase/auth";
 import { getInstallations, getToken } from "firebase/installations";
 
-// this is set during install
-let firebaseConfig;
+const serializedFirebaseConfig = new URL(location).searchParams.get(
+  "firebaseConfig"
+);
 
-firebaseConfig = {
-  apiKey: "AIzaSyDPtZ7hIAh3eM4oC43d0di7kCHcNHIheh4",
-
-  authDomain: "chat-rooms-d5ac3.firebaseapp.com",
-
-  projectId: "chat-rooms-d5ac3",
-
-  storageBucket: "chat-rooms-d5ac3.appspot.com",
-
-  messagingSenderId: "492778811618",
-
-  appId: "1:492778811618:web:ec806c700faaf4aef52ebb",
-};
-
-// Handle the 'install' event and extract the firebaseConfig from the query string if present
-self.addEventListener("install", (event) => {
-  const serializedFirebaseConfig = new URL(location).searchParams.get(
-    "firebaseConfig"
+if (!serializedFirebaseConfig) {
+  throw new Error(
+    "Firebase Config object not found in service worker query string."
   );
+}
 
-  if (serializedFirebaseConfig) {
-    try {
-      firebaseConfig = JSON.parse(serializedFirebaseConfig);
-      console.log(
-        "Service worker installed with Firebase config from query string",
-        firebaseConfig
-      );
-    } catch (error) {
-      console.error("Failed to parse Firebase config from query string", error);
-    }
-  } else {
-    console.log(
-      "Service worker installed with hardcoded Firebase config",
-      firebaseConfig
-    );
-  }
-});
+const firebaseConfig = JSON.parse(serializedFirebaseConfig);
 
 self.addEventListener("fetch", (event) => {
   const { origin } = new URL(event.request.url);

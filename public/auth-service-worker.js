@@ -7983,36 +7983,15 @@
   registerVersion(name4, version4, "esm2017");
 
   // auth-service-worker.js
-  var firebaseConfig;
-  firebaseConfig = {
-    apiKey: "AIzaSyDPtZ7hIAh3eM4oC43d0di7kCHcNHIheh4",
-    authDomain: "chat-rooms-d5ac3.firebaseapp.com",
-    projectId: "chat-rooms-d5ac3",
-    storageBucket: "chat-rooms-d5ac3.appspot.com",
-    messagingSenderId: "492778811618",
-    appId: "1:492778811618:web:ec806c700faaf4aef52ebb"
-  };
-  self.addEventListener("install", (event) => {
-    const serializedFirebaseConfig = new URL(location).searchParams.get(
-      "firebaseConfig"
+  var serializedFirebaseConfig = new URL(location).searchParams.get(
+    "firebaseConfig"
+  );
+  if (!serializedFirebaseConfig) {
+    throw new Error(
+      "Firebase Config object not found in service worker query string."
     );
-    if (serializedFirebaseConfig) {
-      try {
-        firebaseConfig = JSON.parse(serializedFirebaseConfig);
-        console.log(
-          "Service worker installed with Firebase config from query string",
-          firebaseConfig
-        );
-      } catch (error) {
-        console.error("Failed to parse Firebase config from query string", error);
-      }
-    } else {
-      console.log(
-        "Service worker installed with hardcoded Firebase config",
-        firebaseConfig
-      );
-    }
-  });
+  }
+  var firebaseConfig = JSON.parse(serializedFirebaseConfig);
   self.addEventListener("fetch", (event) => {
     const { origin } = new URL(event.request.url);
     if (origin !== self.location.origin) return;
