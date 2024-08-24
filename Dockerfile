@@ -16,8 +16,18 @@ ENV NODE_ENV="production"
 # Throw-away build stage to reduce size of final image
 FROM base as build
 #build arguments
-arg NEXT_PUBLIC_SUPABASE_URL=https://cjentsqhuewbqqeqyawz.supabase.co
-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqZW50c3FodWV3YnFxZXF5YXd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjM0OTQxNzYsImV4cCI6MjAzOTA3MDE3Nn0.-yhx6dJ4ejMnQsHIBrD-233BWDZdyu3S2ssr8fFlEjU 
+arg NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyDPtZ7hIAh3eM4oC43d0di7kCHcNHIheh4
+
+arg NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=chat-rooms-d5ac3.firebaseapp.com
+arg NEXT_PUBLIC_FIREBASE_PROJECT_ID=chat-rooms-d5ac3
+arg NEXT_PUBLIC_FIREBASE_APP_STORAGE_BUCKET=chat-rooms-d5ac3.appspot.com
+
+arg NEXT_PUBLIC_MESSAGING_SENDER_ID=492778811618
+
+arg NEXT_PUBLIC_FIREBASE_APP_ID=1:492778811618:web:ec806c700faaf4aef52ebb
+
+
+
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
